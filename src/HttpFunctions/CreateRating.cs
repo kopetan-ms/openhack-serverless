@@ -75,8 +75,8 @@ namespace Openhack.MS
 
     public class MultiResponse
     {
-        [CosmosDBOutput("Ratings", "Challenge3",
-            ConnectionStringSetting = "CosmosDB", CreateIfNotExists = true)]
+        [CosmosDBOutput("RatingsDB", "Ratings",
+            ConnectionStringSetting = "CosmosDBConnectionString", CreateIfNotExists = true)]
         public Rating rating { get; set; }
         public HttpResponseData HttpResponse { get; set; }
     }
