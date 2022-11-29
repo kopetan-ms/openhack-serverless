@@ -2,8 +2,7 @@ using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-
+using System.Text.Json;
 
 namespace Openhack.MS
 {
@@ -17,12 +16,12 @@ namespace Openhack.MS
         }
 
         [Function("CreateRating")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
+        public async Task<MultiResponse> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
             //get the json payload
             var request = new StreamReader(req.Body).ReadToEnd();
-            var rating = JsonConvert.DeserializeObject<Rating>(request);
+            var rating = JsonSerializer.Deserialize<Rating>(request);
 
             _logger.LogInformation($"Data userid {rating.userId}, product id {rating.productId}");
 
@@ -34,7 +33,11 @@ namespace Openhack.MS
                 {
                     if (productResponse.StatusCode != HttpStatusCode.OK)
                     {
-                        return req.CreateResponse(HttpStatusCode.NotFound);
+                        return new MultiResponse()
+                        {
+                            rating = null,
+                            HttpResponse = req.CreateResponse(HttpStatusCode.NotFound)
+                        };
                     }
                 }
 
@@ -43,27 +46,40 @@ namespace Openhack.MS
                 {
                     if (userResponse.StatusCode != HttpStatusCode.OK)
                     {
-                        return req.CreateResponse(HttpStatusCode.NotFound);
+                        return new MultiResponse()
+                        {
+                            rating = null,
+                            HttpResponse = req.CreateResponse(HttpStatusCode.NotFound)
+                        };
                     }
                 }
             }
 
             //update the json with a timestamp and id 
-            rating.id = new Guid();
+            rating.id = Guid.NewGuid();
             rating.timestamp = DateTime.Now;
 
             //save the json to cosmosDB
-
-
             var response = req.CreateResponse(HttpStatusCode.OK);
-            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+            
+            await response.WriteAsJsonAsync(rating);
 
-            response.WriteString("Welcome to Azure Functions!");
-
-            return response;
+            // Return a response to both HTTP trigger and Azure Cosmos DB output binding.
+            return new MultiResponse()
+            {
+                rating = rating,
+                HttpResponse = response
+            };
         }
     }
 
+    public class MultiResponse
+    {
+        [CosmosDBOutput("Ratings", "Challenge3",
+            ConnectionStringSetting = "CosmosDB", CreateIfNotExists = true)]
+        public Rating rating { get; set; }
+        public HttpResponseData HttpResponse { get; set; }
+    }
     public class Rating
     {
         public Guid id {get; set;}
@@ -75,3 +91,4 @@ namespace Openhack.MS
         public DateTime timestamp {get; set;}
     }
 }
+
