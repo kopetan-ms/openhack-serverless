@@ -6,7 +6,7 @@ param containers array = [
   {
     name: 'Ratings'
     id: 'Ratings'
-    partitionKey: 'userId'
+    partitionKey: '/userId'
   }
 ]
 param databaseName string = ''

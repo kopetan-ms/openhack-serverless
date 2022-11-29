@@ -27,6 +27,9 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
   location: location
   tags: tags
   kind: 'functionapp,linux'
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     httpsOnly: true
     serverFarmId: hostingPlan.id

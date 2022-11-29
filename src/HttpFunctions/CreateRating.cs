@@ -9,6 +9,7 @@ namespace Openhack.MS
     public class CreateRating
     {
         private readonly ILogger _logger;
+        private static HttpClient httpClient = new HttpClient();
 
         public CreateRating(ILoggerFactory loggerFactory)
         {
@@ -26,32 +27,30 @@ namespace Openhack.MS
             _logger.LogInformation($"Data userid {rating.userId}, product id {rating.productId}");
 
             //validate json data with provided APIs
-            using (HttpClient client = new HttpClient())
+            
+            var urlProduct = $"https://serverlessohapi.azurewebsites.net/api/GetProduct?productId={rating.productId}";
+            using (HttpResponseMessage productResponse = httpClient.GetAsync(urlProduct).Result)
             {
-                var urlProduct = $"https://serverlessohapi.azurewebsites.net/api/GetProduct?productId={rating.productId}";
-                using (HttpResponseMessage productResponse = client.GetAsync(urlProduct).Result)
+                if (productResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    if (productResponse.StatusCode != HttpStatusCode.OK)
+                    return new MultiResponse()
                     {
-                        return new MultiResponse()
-                        {
-                            rating = null,
-                            HttpResponse = req.CreateResponse(HttpStatusCode.NotFound)
-                        };
-                    }
+                        rating = null,
+                        HttpResponse = req.CreateResponse(HttpStatusCode.NotFound)
+                    };
                 }
+            }
 
-                var urlUser = $"https://serverlessohapi.azurewebsites.net/api/GetUser?userId={rating.userId}";
-                using (HttpResponseMessage userResponse = client.GetAsync(urlUser).Result)
+            var urlUser = $"https://serverlessohapi.azurewebsites.net/api/GetUser?userId={rating.userId}";
+            using (HttpResponseMessage userResponse = httpClient.GetAsync(urlUser).Result)
+            {
+                if (userResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    if (userResponse.StatusCode != HttpStatusCode.OK)
+                    return new MultiResponse()
                     {
-                        return new MultiResponse()
-                        {
-                            rating = null,
-                            HttpResponse = req.CreateResponse(HttpStatusCode.NotFound)
-                        };
-                    }
+                        rating = null,
+                        HttpResponse = req.CreateResponse(HttpStatusCode.NotFound)
+                    };
                 }
             }
 
@@ -75,8 +74,8 @@ namespace Openhack.MS
 
     public class MultiResponse
     {
-        [CosmosDBOutput("RatingsDB", "Ratings",
-            ConnectionStringSetting = "CosmosDBConnectionString", CreateIfNotExists = true)]
+        [CosmosDBOutput(Consts.CosmosDBDatabase, Consts.CosmosDBCollection,
+            ConnectionStringSetting = Consts.ConnectionStringSetting, CreateIfNotExists = true)]
         public Rating rating { get; set; }
         public HttpResponseData HttpResponse { get; set; }
     }

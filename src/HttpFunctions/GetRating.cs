@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -16,17 +15,15 @@ namespace Openhack.MS
         }
 
         [Function("GetRating")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get",Route = "GetRating/{ratingId}")] HttpRequestData req, [CosmosDBInput(databaseName: "Ratings",
-                       collectionName: "Challenge3",
-                       ConnectionStringSetting = "CosmosDbConnectionString",
+        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get",Route = "GetRating/{ratingId}")] HttpRequestData req, 
+        [CosmosDBInput(databaseName: Consts.CosmosDBDatabase,
+                       collectionName: Consts.CosmosDBCollection,
+                       ConnectionStringSetting = Consts.ConnectionStringSetting,
                        SqlQuery = "select * from Ratings r where r.id = {ratingId}")] IEnumerable<Rating> ratings)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-           // response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-
-            //response.WriteString("Welcome to Azure Functions!");
             response.WriteAsJsonAsync(ratings);
 
             return response;

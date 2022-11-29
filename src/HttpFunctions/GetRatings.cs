@@ -15,17 +15,16 @@ namespace Openhack.MS
         }
 
         [Function("GetRatings")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get",Route = "GetRatings/{userId}")] HttpRequestData req, [CosmosDBInput(databaseName: "Ratings",
-                       collectionName: "Challenge3",
-                       ConnectionStringSetting = "CosmosDbConnectionString",
+        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get",Route = "GetRatings/{userId}")] HttpRequestData req, 
+        [CosmosDBInput(databaseName: Consts.CosmosDBDatabase,
+                       collectionName: Consts.CosmosDBCollection,
+                       ConnectionStringSetting = Consts.ConnectionStringSetting,
                        SqlQuery = "select * from Ratings r where r.userId = {userId}")] IEnumerable<Rating> ratings)
                 
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            //response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-
             response.WriteAsJsonAsync(ratings);
 
             return response;
