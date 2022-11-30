@@ -24,10 +24,9 @@ namespace Openhack.MS
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            response.WriteAsJsonAsync(ratings);
+            response.WriteAsJsonAsync(ratings.Single());
 
             return response;
         }
     }
-    
 }
