@@ -3,6 +3,7 @@ param resourceToken string
 param tags object
 param name string
 var abbrs = loadJsonContent('abbreviations.json')
+var cosmosDatabaseName = 'RatingsDB'
 
 resource logs 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
@@ -54,12 +55,40 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
   }
 }
 
+module keyVault 'modules/security/keyvault.bicep' = {
+  name: 'keyvault'
+  params: {
+    name: '${abbrs.keyVaultVaults}${resourceToken}'
+    location: location
+    tags: tags
+  }
+}
+
+module cosmos 'modules/db.bicep' = {
+  name: 'cosmos'
+  params: {
+    accountName: '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+    databaseName: cosmosDatabaseName
+    location: location
+    tags: tags
+    keyVaultName: keyVault.outputs.name
+  }
+}
+
 module function 'modules/function.bicep' = {
   name: name
   params: {
     name: name
     location: location
     applicationName: '${name}httpfunctions'
+  }
+}
+
+module apiKeyVaultAccess 'modules/security/keyvault-access.bicep' = {
+  name: 'api-keyvault-access'
+  params: {
+    keyVaultName: keyVault.outputs.name
+    principalId: function.outputs.principalId
   }
 }
 

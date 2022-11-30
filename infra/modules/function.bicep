@@ -18,11 +18,18 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' existing = {
   name:  '${abbrs.hostingPlan}${resourceToken}'
 }
 
+resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' existing = {
+  name: '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+}
+
 resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
   name: applicationName
   location: location
   tags: tags
   kind: 'functionapp,linux'
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     httpsOnly: true
     serverFarmId: hostingPlan.id
@@ -51,9 +58,14 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: ai.properties.InstrumentationKey
         }
+        {
+          name: 'CosmosDBConnectionString'
+          value: cosmos.listConnectionStrings().connectionStrings[0].connectionString
+        }
       ]
     }
   }
 }
 
-output application_url string = functionApp.properties.hostNames[0]
+output appUrl string = functionApp.properties.hostNames[0]
+output principalId string = functionApp.identity.principalId

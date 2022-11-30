@@ -1,10 +1,10 @@
 {
     "java.configuration.updateBuildConfiguration": "interactive",
-    "azureFunctions.deploySubpath": "src/HttpFunctions",
+    "azureFunctions.deploySubpath": "src/HttpFunctions/bin/Release/net7.0/publish",
     "azureFunctions.postDeployTask": "npm install (functions)",
-    "azureFunctions.projectLanguage": "JavaScript",
+    "azureFunctions.projectLanguage": "C#",
     "azureFunctions.projectRuntime": "~4",
     "debug.internalConsoleOptions": "neverOpen",
     "azureFunctions.projectSubpath": "src/HttpFunctions",
-    "azureFunctions.preDeployTask": "npm prune (functions)"
+    "azureFunctions.preDeployTask": "publish (functions)"
 }
