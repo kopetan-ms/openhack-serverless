@@ -3,6 +3,7 @@
     "operationalInsightsWorkspaces": "log-",
     "resourcesResourceGroups": "rg-",
     "storageAccount":"stacc",
+    "storageAccountBatch": "stbat",
     "hostingPlan":"hpl",
     "keyVaultVaults": "kv-",
     "documentDBDatabaseAccounts": "db-"

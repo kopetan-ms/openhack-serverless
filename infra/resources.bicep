@@ -41,6 +41,16 @@ resource storageNotify 'Microsoft.Storage/storageAccounts@2021-09-01' = {
   }
 }
 
+resource storageBatch 'Microsoft.Storage/storageAccounts@2021-09-01' = {
+  name: '${abbrs.storageAccountBatch}${resourceToken}'
+  location: location
+  tags: tags
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_LRS'
+  }
+}
+
 resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
   name:  '${abbrs.hostingPlan}${resourceToken}'
   location: location
