@@ -18,7 +18,7 @@ namespace Openhack.MS
         public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get",Route = "GetRating/{ratingId}")] HttpRequestData req, 
         [CosmosDBInput(databaseName: Consts.CosmosDBDatabase,
                        collectionName: Consts.CosmosDBCollection,
-                       ConnectionStringSetting = Consts.ConnectionStringSetting,
+                       ConnectionStringSetting = Consts.CosmosConnectionStringSetting,
                        SqlQuery = "select * from Ratings r where r.id = {ratingId}")] IEnumerable<Rating> ratings)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");

@@ -7,5 +7,11 @@
                 "excludedTypes": "Request"
             }
         }
+    },
+    "extensions": {
+        "eventHubs": {
+            "maxEventBatchSize" : 64,
+            "prefetchCount" : 256
+        }
     }
 }

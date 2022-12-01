@@ -18,7 +18,7 @@ namespace Openhack.MS
         public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get",Route = "GetRatings/{userId}")] HttpRequestData req, 
         [CosmosDBInput(databaseName: Consts.CosmosDBDatabase,
                        collectionName: Consts.CosmosDBCollection,
-                       ConnectionStringSetting = Consts.ConnectionStringSetting,
+                       ConnectionStringSetting = Consts.CosmosConnectionStringSetting,
                        SqlQuery = "select * from Ratings r where r.userId = {userId}")] IEnumerable<Rating> ratings)
                 
         {

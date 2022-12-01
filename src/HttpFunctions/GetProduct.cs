@@ -4,7 +4,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using System.Web;
 
-namespace HttpFunctions
+namespace Openhack.MS
 {
     public class GetProduct
     {
