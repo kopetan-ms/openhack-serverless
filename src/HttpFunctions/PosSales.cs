@@ -1,3 +1,5 @@
+using System.Text.Json;
+using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -6,10 +8,12 @@ namespace Openhack.MS
     public class PosSales
     {
         private readonly ILogger _logger;
+        private readonly ServiceBusSender _sender;
 
-        public PosSales(ILoggerFactory loggerFactory)
+        public PosSales(ILoggerFactory loggerFactory, ServiceBusClient client)
         {
             _logger = loggerFactory.CreateLogger<PosSales>();
+             _sender = client.CreateSender(Consts.ServiceBusTopic);
         }
 
         // Challenge 7
@@ -24,11 +28,29 @@ namespace Openhack.MS
         
         [Function("PosSales")]
         [ServiceBusOutput(Consts.ServiceBusTopic, Connection = Consts.SerbiceBusConnectionStringSetting, EntityType = EntityType.Topic)]
-        public IReadOnlyList<string> Run([EventHubTrigger(Consts.EventHubName, Connection = Consts.EventHubConnectionStringSetting)] List<ReceivedEvent> input)
+        public async Task Run([EventHubTrigger(Consts.EventHubName, Connection = Consts.EventHubConnectionStringSetting)] List<ReceivedEvent> input)
         {
             _logger.LogInformation($"First Event Hubs triggered message: {input[0]}");
-            
-            return new List<string> { "Hello", "World" }.AsReadOnly();
+            var messages =
+              input.Where( i => !string.IsNullOrEmpty(i.header.receiptUrl))
+                    .Select( i => 
+                    {
+                        var messageBody = 
+                            JsonSerializer.Serialize( 
+                                    new SalesMessage {
+                                        totalItems = i.details.Length,
+                                        totalCost = decimal.Parse(i.header.totalCost),
+                                        salesNumber = i.header.salesNumber,
+                                        salesDate = i.header.dateTime,
+                                        storeLocation = i.header.locationId,
+                                        receiptUrl = i.header.receiptUrl
+                                });
+                        var message = new ServiceBusMessage(messageBody);
+                        message.ApplicationProperties.Add("totalCost",decimal.Parse(i.header.totalCost));
+                        return message;
+                    });
+                    
+            await _sender.SendMessagesAsync(messages);
         }
     }
 
