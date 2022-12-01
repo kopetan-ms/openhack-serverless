@@ -14,7 +14,7 @@ namespace Openhack.MS
         }
 
         [Function("RegularReceipts")]
-        [BlobOutput($"{Consts.BlobStoragePath}/{rund-guid}-output.txt")]
+        [BlobOutput(Consts.BlobStoragePath + "/{rand-guid}-output.txt", Consts.StorageAccountConnectionStringSetting)]
         public RegularBlob Run([ServiceBusTrigger(Consts.ServiceBusTopic, Consts.RegularSubscription, Connection = Consts.SerbiceBusConnectionStringSetting)] SalesMessage mySbMsg)
         {
             _logger.LogInformation($"C# ServiceBus topic trigger function processed message with total items: {mySbMsg.totalItems}");

@@ -13,6 +13,7 @@ namespace Openhack.MS
         public const string PrioritySubscription = "PrioritySubscription";
         public const string RegularSubscription = "RegularSubscription";
         public const string ServiceBusTopic = "orders";
+        public const string BlobStoragePath = "receipts";
     }
 }
 
